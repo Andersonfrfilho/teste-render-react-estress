@@ -1,25 +1,17 @@
 import React from 'react';
-import {
-  Grid,
-
-  Typography,
-
-  colors,
-  Avatar,
-  TextField,
-} from '@material-ui/core';
+import { Grid, Typography, colors, Avatar, TextField } from '@material-ui/core';
 import moment from 'moment';
 import { Chart, Table, ChartLabel } from 'common/components';
-import SectionIcon from 'medical-report/components/sectionIcon';
-import Property from 'medical-report/components/property';
-import FoodTable from 'medical-report/components/foodTable';
-import DataQualityTable from 'medical-report/components/dataQualityTable';
-import TableBar from 'medical-report/components/tableBar';
 import generateChart from 'patient/utils/generateChart';
 import { bloodListChart } from 'patient/utils/dataChart';
+import _ from 'lodash';
+import SectionIcon from '../sectionIcon';
+import Property from '../property';
+import FoodTable from '../foodTable';
+import DataQualityTable from '../dataQualityTable';
+import TableBar from '../tableBar';
 
 import UseStyles from './styles';
-import _ from 'lodash';
 
 import userLogo from '../sectionIcon/img/user.png';
 import glycemiaLogo from '../sectionIcon/img/glycemia.png';
@@ -70,8 +62,7 @@ const medicalReportChart = (chart, configs) => {
     { hour: 0, value: [data.hypo_limit, data.hyper_limit] },
     { hour: 60 * 24, value: [data.hypo_limit, data.hyper_limit] },
   ]);
-  v1.area()
-    .position('hour*value');
+  v1.area().position('hour*value');
 
   const targetMax = chart.createView({
     // padding: 32
@@ -80,7 +71,8 @@ const medicalReportChart = (chart, configs) => {
     { hour: 0, value: data.hypo_limit },
     { hour: 60 * 24, value: data.hypo_limit },
   ]);
-  targetMax.line()
+  targetMax
+    .line()
     .position('hour*value')
     .shape('smooth')
     .color('#2f5fa8');
@@ -92,7 +84,8 @@ const medicalReportChart = (chart, configs) => {
     { hour: 0, value: data.hyper_limit },
     { hour: 60 * 24, value: data.hyper_limit },
   ]);
-  targetMin.line()
+  targetMin
+    .line()
     .position('hour*value')
     .shape('smooth')
     .color('#2f5fa8');
@@ -111,14 +104,23 @@ const medicalReportChart = (chart, configs) => {
     .shape('circle');
   if (data.boxPlot) {
     const boxPlotMinMax = chart.createView();
-    boxPlotMinMax.data(data.median.map(item => ({ hour: item.hour, value: item.boxPlotMinMax })));
-    boxPlotMinMax.area()
+    boxPlotMinMax.data(
+      data.median.map(item => ({ hour: item.hour, value: item.boxPlotMinMax }))
+    );
+    boxPlotMinMax
+      .area()
       .position('hour*value')
       .color('rgba(255, 111, 0, 0.7)');
 
     const boxPlotQuartile = chart.createView();
-    boxPlotQuartile.data(data.median.map(item => ({ hour: item.hour, value: item.boxPlotQuartile })));
-    boxPlotQuartile.area()
+    boxPlotQuartile.data(
+      data.median.map(item => ({
+        hour: item.hour,
+        value: item.boxPlotQuartile,
+      }))
+    );
+    boxPlotQuartile
+      .area()
       .position('hour*value')
       .color('rgba(255, 111, 0, 0.9)');
   }
@@ -151,9 +153,7 @@ const diabetes = [
   { id: 4, name: 'Outros' },
 ];
 export default function Report(props) {
-  const {
-    exam,
-  } = props.patient;
+  const { exam } = props.patient;
   const {
     patient,
     glycemia,
@@ -225,91 +225,63 @@ export default function Report(props) {
       ...weeklyCycle.basal.total,
     },
   ];
-  const renderReportByDay = () => reportByDay.map((data, i) => (
-    <Grid key={i.toString()} container >
-      <Grid
-        container
-        style={{ marginTop: 30, marginBottom: 30 }}
-        direction="column"
-        alignItems="stretch"
-        spacing={1}
-      >
+  const renderReportByDay = () =>
+    reportByDay.map((data, i) => (
+      <Grid key={i.toString()} container>
         <Grid
           container
-          direction="row"
+          style={{ marginTop: 30, marginBottom: 30 }}
+          direction="column"
           alignItems="stretch"
           spacing={1}
-
         >
-          <Grid
-            item
-            xs={1}
-          >
-
-            <Avatar
-              className={classes.large}
-              src={glycemiaLogo}
-            />
+          <Grid container direction="row" alignItems="stretch" spacing={1}>
+            <Grid item xs={1}>
+              <Avatar className={classes.large} src={glycemiaLogo} />
+            </Grid>
+            <Grid item xs={11}>
+              <Typography className={classes.glicemicCicleTitle}>
+                Ciclo diário de Glicemia -{' '}
+                {moment(data.date).format('DD/MM/YYYY')}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid
-            item
-            xs={11}
-          >
-            <Typography
-              className={classes.glicemicCicleTitle}
-            >
-          Ciclo diário de Glicemia - {moment(data.date).format('DD/MM/YYYY')}
-            </Typography>
+          <Grid container alignItems="center" justify="center" spacing={1}>
+            <Grid item xs={10}>
+              <Chart
+                chartId={`chartMedicalReport${i}`}
+                operation={medicalReportChart}
+                data={() => []}
+                width={780}
+                height={500}
+                configs={{
+                  data: {
+                    chartData: data.graphicData.data,
+                    hypo_limit: glycemia.hypo_limit,
+                    hyper_limit: glycemia.hyper_limit,
+                    median: data.graphicData.median,
+                  },
+                }}
+                newDataViews
+                padding={[5, 10, 25, 25]}
+              />
+            </Grid>
           </Grid>
         </Grid>
-        <Grid
-          container
-          alignItems="center"
-          justify="center"
-          spacing={1}
-        >
-          <Grid
-            item
-            xs={10}
-          >
-
-            <Chart
-              chartId={`chartMedicalReport${i}`}
-              operation={medicalReportChart}
-              data={() => []}
-              width={780}
-              height={500}
-              configs={{
-                data: {
-                  chartData: data.graphicData.data,
-                  hypo_limit: glycemia.hypo_limit,
-                  hyper_limit: glycemia.hyper_limit,
-                  median: data.graphicData.median,
-                },
-              }}
-              newDataViews
-              padding={[5, 10, 25, 25]}
-            />
-          </Grid>
-        </Grid>
+        <TableBar
+          cumulativeByHours={{
+            glycemia: data.glycemia,
+            meal: data.meal,
+            bolus: data.bolus,
+            basal: data.basal,
+          }}
+        />
       </Grid>
-      <TableBar
-        cumulativeByHours={{
-          glycemia: data.glycemia,
-          meal: data.meal,
-          bolus: data.bolus,
-          basal: data.basal,
-        }}
-      />
-    </Grid>
-  ));
+    ));
   return (
     <Grid item xs={12} style={{ marginTop: 50 }}>
-      <Grid container >
-        <SectionIcon
-          color={colors.grey[300]}
-          src={userLogo}
-        />
+      <Grid container>
+        <SectionIcon color={colors.grey[300]} src={userLogo} />
         <Grid item xs={5}>
           <Property
             label="Paciente"
@@ -328,7 +300,12 @@ export default function Report(props) {
           />
           <Property
             label="Dias"
-            value={moment(props.reportEndDate).diff(moment(props.reportStartDate), 'days') + 1}
+            value={
+              moment(props.reportEndDate).diff(
+                moment(props.reportStartDate),
+                'days'
+              ) + 1
+            }
             labelStyle={classes.bold}
           />
           <Property
@@ -343,7 +320,11 @@ export default function Report(props) {
           />
           <Property
             label="Nascimento"
-            value={patient.born_date ? moment(patient.born_date).format('DD/MM/YYYY') : '-'}
+            value={
+              patient.born_date
+                ? moment(patient.born_date).format('DD/MM/YYYY')
+                : '-'
+            }
             labelStyle={classes.bold}
           />
           <Property
@@ -353,7 +334,9 @@ export default function Report(props) {
           />
           <Property
             label="Peso"
-            value={patient.weight ? `${Number(patient.weight).toFixed(1)} kg` : '-'}
+            value={
+              patient.weight ? `${Number(patient.weight).toFixed(1)} kg` : '-'
+            }
             labelStyle={classes.bold}
           />
           <Property
@@ -423,9 +406,7 @@ export default function Report(props) {
           label="Alimentação"
         />
         <Grid item xs={10}>
-          <FoodTable
-            data={meal}
-          />
+          <FoodTable data={meal} />
         </Grid>
       </Grid>
       <Grid container className={classes.section} alignItems="center">
@@ -447,9 +428,7 @@ export default function Report(props) {
                 value={insulin.basal ? `${insulin.basal} U/dia` : '-'}
                 labelStyle={classes.bold}
               />
-              <Typography>
-                * Dose diária média
-              </Typography>
+              <Typography>* Dose diária média</Typography>
             </Grid>
           </Grid>
         </Grid>
@@ -463,17 +442,29 @@ export default function Report(props) {
             <Grid item xs={6}>
               <Property
                 label="Gasto energético médio"
-                value={physicalActivity.disabled ? physicalActivity.caloriesBurnAverage : '-'}
+                value={
+                  physicalActivity.disabled
+                    ? physicalActivity.caloriesBurnAverage
+                    : '-'
+                }
                 labelStyle={classes.bold}
               />
               <Property
                 label="Taxa metab. Basal"
-                value={physicalActivity.disabled ? physicalActivity.basalMetabolicRate : '-'}
+                value={
+                  physicalActivity.disabled
+                    ? physicalActivity.basalMetabolicRate
+                    : '-'
+                }
                 labelStyle={classes.bold}
               />
               <Property
                 label="Gasto energético em Atividade"
-                value={physicalActivity.disabled ? physicalActivity.energyExpenditure : '-'}
+                value={
+                  physicalActivity.disabled
+                    ? physicalActivity.energyExpenditure
+                    : '-'
+                }
                 labelStyle={classes.bold}
               />
             </Grid>
@@ -487,9 +478,7 @@ export default function Report(props) {
           label="Qualidade dos dados"
         />
         <Grid item xs={10}>
-          <DataQualityTable
-            data={data_quality}
-          />
+          <DataQualityTable data={data_quality} />
         </Grid>
       </Grid>
       <Grid item xs={12} className={classes.section}>
@@ -500,7 +489,7 @@ export default function Report(props) {
           rows={5}
           variant="outlined"
           multiline
-          onChange={(event) => {
+          onChange={event => {
             props.setInfo(event.target.value);
           }}
         />
@@ -512,44 +501,18 @@ export default function Report(props) {
         alignItems="stretch"
         spacing={1}
       >
-        <Grid
-          container
-          direction="row"
-          alignItems="stretch"
-          spacing={1}
-        >
-          <Grid
-            item
-            xs={1}
-          >
-
-            <Avatar
-              className={classes.large}
-              src={glycemiaLogo}
-            />
+        <Grid container direction="row" alignItems="stretch" spacing={1}>
+          <Grid item xs={1}>
+            <Avatar className={classes.large} src={glycemiaLogo} />
           </Grid>
-          <Grid
-            item
-            xs={11}
-          >
-            <Typography
-              className={classes.glicemicCicleTitle}
-            >
-            Ciclo diário de Glicemia (Mediana ao longo das horas do dia)
+          <Grid item xs={11}>
+            <Typography className={classes.glicemicCicleTitle}>
+              Ciclo diário de Glicemia (Mediana ao longo das horas do dia)
             </Typography>
           </Grid>
         </Grid>
-        <Grid
-          container
-          alignItems="center"
-          justify="center"
-          spacing={1}
-        >
-          <Grid
-            item
-            xs={10}
-          >
-
+        <Grid container alignItems="center" justify="center" spacing={1}>
+          <Grid item xs={10}>
             <Chart
               chartId="chartMedicalReport"
               operation={medicalReportChart}
@@ -570,25 +533,15 @@ export default function Report(props) {
             />
           </Grid>
         </Grid>
-        <TableBar
-          cumulativeByHours={cumulativeByHours}
-        />
+        <TableBar cumulativeByHours={cumulativeByHours} />
         <Grid>
-          <Typography
-            className={classes.weeklyCycleTitle}
-          >
+          <Typography className={classes.weeklyCycleTitle}>
             Ciclo de Glicemia semanal
           </Typography>
-          <Table
-            columns={columns}
-            data={tableData}
-            noFooter
-          />
+          <Table columns={columns} data={tableData} noFooter />
         </Grid>
       </Grid>
-      {
-        reportByDay.length ? renderReportByDay() : null
-      }
+      {reportByDay.length ? renderReportByDay() : null}
     </Grid>
   );
 }

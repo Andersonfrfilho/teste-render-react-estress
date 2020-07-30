@@ -4,7 +4,6 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import { Form, SubmitButton, List } from './styles';
-import Container from '../../components/Container';
 import * as LoginActions from '../../store/modules/login/actions';
 
 export default function Login() {
@@ -27,7 +26,7 @@ export default function Login() {
     setNewUser('');
   }
   return (
-    <Container>
+    <>
       <h1>
         <FaGithubAlt />
         Main
@@ -35,6 +34,6 @@ export default function Login() {
       <Button variant="contained" color="primary">
         Hello World
       </Button>
-    </Container>
+    </>
   );
 }

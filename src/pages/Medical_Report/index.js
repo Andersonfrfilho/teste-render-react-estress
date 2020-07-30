@@ -11,9 +11,10 @@ import {
   Card,
 } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
-import Container from '../../components/Container';
 import * as HomeActions from '../../store/modules/medical_report/actions';
 import UseStyles from './styles';
+import ReportFilter from '../../components/ReportFilter';
+import Report from '../../components/report';
 
 export default function Home() {
   const { loading } = useSelector(state => state.common);
@@ -144,17 +145,17 @@ export default function Home() {
                 </Grid>
               </Grid>
             ) : null}
-            {/*! props.loading.patient ? (
+            {!props.loading.patient ? (
               <ReportFilter
                 patient={props.patient}
                 filterSubmit={props.filterSubmit}
                 push={props.push}
                 user={props.user}
-                initialValues={props.initialValues}
+                initialValues={props.user}
               />
-            ) : null */}
+            ) : null}
 
-            {/*! props.isLoading ? (
+            {!props.isLoading ? (
               <Report {...props} />
             ) : (
               <div
@@ -172,7 +173,7 @@ export default function Home() {
                   Compilando dados do paciente. Por favor aguarde um momento.
                 </Typography>
               </div>
-              ) */}
+            )}
           </Grid>
         </Card>
       </Grid>
